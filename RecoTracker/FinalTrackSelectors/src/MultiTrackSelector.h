@@ -54,7 +54,8 @@ namespace reco { namespace modules {
 			 const reco::Track &tk, 
 			 const std::vector<Point> &points,
 			 std::vector<double> &vterr,
-			 std::vector<double> &vzerr);
+			 std::vector<double> &vzerr,
+			 bool isHLT);
             void selectVertices ( unsigned int tsNum,
 				  const reco::VertexCollection &vtxs, 
 				  std::vector<Point> &points,
@@ -63,6 +64,7 @@ namespace reco { namespace modules {
             /// source collection label
             edm::InputTag src_;
             edm::InputTag beamspot_;
+            bool          isHLT_;
             bool          useVertices_;
             bool          useVtxError_;
             edm::InputTag vertices_;
