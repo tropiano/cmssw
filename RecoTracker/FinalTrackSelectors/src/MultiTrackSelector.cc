@@ -10,6 +10,7 @@ using reco::modules::MultiTrackSelector;
 MultiTrackSelector::MultiTrackSelector( const edm::ParameterSet & cfg ) :
   src_( cfg.getParameter<edm::InputTag>( "src" ) ),
   beamspot_( cfg.getParameter<edm::InputTag>( "beamspot" ) ),
+  isHLT_( cfg.getParameter<bool>( "isHLT" ) ),
   useVertices_( cfg.getParameter<bool>( "useVertices" ) ),
   useVtxError_( cfg.getParameter<bool>( "useVtxError" ) ),
   vertices_( useVertices_ ? cfg.getParameter<edm::InputTag>( "vertices" ) : edm::InputTag("NONE"))
@@ -170,7 +171,7 @@ void MultiTrackSelector::produce( edm::Event& evt, const edm::EventSetup& es )
 	  continue;
       }
       else {
-	ok = select(i,vertexBeamSpot, trk, points, vterr, vzerr);
+	ok = select(i,vertexBeamSpot, trk, points, vterr, vzerr, isHLT_);
 	if (!ok) { 
 	  LogTrace("TrackSelection") << "track with pt="<< trk.pt() << " NOT selected";
 	  if (!keepAllTracks_[i]) { 
@@ -215,7 +216,8 @@ void MultiTrackSelector::produce( edm::Event& evt, const edm::EventSetup& es )
 				 const reco::Track &tk, 
 				 const std::vector<Point> &points,
 				 std::vector<double> &vterr,
-				 std::vector<double> &vzerr) {
+				 std::vector<double> &vzerr,
+				 bool isHLT) {
   // Decide if the given track passes selection cuts.
 
   using namespace std; 
@@ -239,12 +241,21 @@ void MultiTrackSelector::produce( edm::Event& evt, const edm::EventSetup& es )
   double chi2n_no1Dmod = chi2n;
 
   int count1dhits = 0;
+  int count3dhits = 0;
+
   for (trackingRecHit_iterator ith = tk.recHitsBegin(), edh = tk.recHitsEnd(); ith != edh; ++ith) {
     const TrackingRecHit * hit = ith->get();
     if (hit->isValid()) {
       if (typeid(*hit) == typeid(SiStripRecHit1D)) ++count1dhits;
+      if(isHLT && (typeid(*hit) == typeid(SiStripRecHit2D))) ++count3dhits;
     }
   }
+
+  if(isHLT){
+    nlayers3D = tk.hitPattern().pixelLayersWithMeasurement() + count3dhits;
+  }
+  cout << "n 3D hits: " << count3dhits << endl;
+
   if (count1dhits > 0) {
     double chi2 = tk.chi2();
     double ndof = tk.ndof();
