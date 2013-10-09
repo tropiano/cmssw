@@ -45,6 +45,7 @@ AnalyticalTrackSelector::AnalyticalTrackSelector( const edm::ParameterSet & cfg 
     copyTrajectories_ = cfg.getUntrackedParameter<bool>("copyTrajectories", false);
     minEta_ = cfg.getParameter<double>("min_eta");
     maxEta_ = cfg.getParameter<double>("max_eta");
+    isHLT_ = cfg.getParameter<bool>( "isHLT" );
     
     qualityToSet_.push_back( TrackBase::undefQuality );
     // parameters for vertex selection
@@ -174,7 +175,7 @@ void AnalyticalTrackSelector::produce( edm::Event& evt, const edm::EventSetup& e
 
     LogTrace("TrackSelection") << "ready to check track with pt="<< trk.pt() ;
     
-    bool ok = trk.eta()>minEta_ && trk.eta()<maxEta_ && select(0,vertexBeamSpot, trk, points, vterr, vzerr);
+    bool ok = trk.eta()>minEta_ && trk.eta()<maxEta_ && select(0,vertexBeamSpot, trk, points, vterr, vzerr, isHLT_);
     if (!ok) {
 
       LogTrace("TrackSelection") << "track with pt="<< trk.pt() << " NOT selected";
