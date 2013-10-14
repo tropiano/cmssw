@@ -1,6 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 selectTight = cms.EDProducer("AnalyticalTrackSelector",
+    #is hlt?
+    isHLT = cms.bool("False"),                         
     src = cms.InputTag("generalTracks"),
     keepAllTracks = cms.bool(False), ## if set to true tracks failing this filter are kept in the output
     beamspot = cms.InputTag("offlineBeamSpot"),
